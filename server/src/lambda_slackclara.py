@@ -49,13 +49,15 @@ def lambda_handler(data, context):
         # and reverse it.
         text = slack_event["text"]
         even = {'msg':text , 'index':'books1', "field":'pkey',"res":"res", "score":0.75  }
-        reversed_text = kbhandler(even)
+        response = kbhandler(even)
+        if response.strip() == '' :
+            response = "sorry~ don't know how to response --> " + text
         
         # Get the ID of the channel where the message was posted.
         channel_id = slack_event["channel"]
         
         # We need to send back three pieces of information:
-        #     1. The reversed text (text)
+        #     1. The response
         #     2. The channel id of the private, direct chat (channel)
         #     3. The OAuth token required to communicate with 
         #        the API (token)
@@ -65,7 +67,7 @@ def lambda_handler(data, context):
             (
                 ("token", BOT_TOKEN),
                 ("channel", channel_id),
-                ("text", reversed_text)
+                ("text", response)
             )
         )
         data = data.encode("ascii")
@@ -148,7 +150,7 @@ if __name__ == '__main__':
     import sys
     index = sys.argv[1]
     msg = sys.argv[2]
-    even = {'msg':msg , 'index':index, "field":'pkey',"res":"res", "score":0.75}
+    even = {'msg':msg , 'index':index, "field":'pkey',"res":"res", "score":1.2}
     r = kbhandler(even)
     print("==== result ===")
     print(r)
