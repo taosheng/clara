@@ -1,6 +1,6 @@
 # To deploy lambda on AWS
 rm slackclara.zip
-zip slackclara.zip -r lambda_slackclara.py nocheckin.py elasticsearch/ elasticsearch5/ certifi/ chardet/ requests/ idna/ requests_aws4auth/ urllib3/ awsconfig.py
+zip slackclara.zip -r lambda_slackclara.py nocheckin.py elasticsearch/ elasticsearch5/ certifi/ chardet/ requests/ idna/ requests_aws4auth/ urllib3/ awsconfig.py simple_sentiment.py subjclueslen1-HLTEMNLP05.tff
 
 aws --profile ailine s3 cp slackclara.zip s3://sandyai2/
 
