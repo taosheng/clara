@@ -8,6 +8,7 @@ import os
 import logging
 import urllib
 import random
+from simple_sentiment import Sentiment 
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 from awsconfig import ESHOST, REGION
@@ -18,6 +19,7 @@ SLACK_URL = "https://slack.com/api/chat.postMessage"
 min_score=2
 host = ESHOST
 region = REGION
+sentiment = Sentiment("subjclueslen1-HLTEMNLP05.tff")
 
 awsauth = AWS4Auth(aws_access_key_id, aws_secret_access_key, region, 'es')
 
@@ -48,10 +50,19 @@ def lambda_handler(data, context):
         # Get the text of the message the user sent to the bot,
         # and reverse it.
         text = slack_event["text"]
-        even = {'msg':text , 'index':'books1', "field":'pkey',"res":"res", "score":0.75  }
+        even = {'msg':text , 'index':'clara', "field":'pkey',"res":"res", "score":0.95  }
         response = kbhandler(even)
         if response.strip() == '' :
             response = "sorry~ don't know how to response --> " + text
+
+        evaluateSentiment = sentiment.weight_by_string(text)
+        print(evaluateSentiment)
+        if evaluateSentiment <= -4 and evaluateSentiment >= -8 :
+            response = "I feel that you are a bit emotional \n"
+        if evaluateSentiment < -8 :
+            response = "I feel that you have an emotional breakdown, take a deep breath \n"
+        if evaluateSentiment > 4 :
+            response = "I am always happy to talk to you :) \n"
         
         # Get the ID of the channel where the message was posted.
         channel_id = slack_event["channel"]
@@ -122,35 +133,20 @@ def kbhandler(even):
     allposi =[]
     allposiScore =[]
     cntPossible = 0
+    result = ""
     for h in res['hits']['hits']:
-        #print(h)
-        score = int(h['_score'])+1
-        if type(allposi) == type(h['_source']['res']) :
-            allposi = allposi + h['_source']['res']
-        else:
-            continue
-        allposiScore.append(score)
-        cntPossible += 1
-        #result = random.choice((h['_source']['res']))
-        #return result
-    toPick = []
-    for exdi in range(cntPossible):
-        toPick = toPick + [exdi] * allposiScore[exdi]
-    #print(toPick)
-    if len(allposi) > 0:
-        resultPick = random.choice(toPick)
-        result = allposi[resultPick]
-        return result
+        print(h)
+        result = h['_source']['res'][0]
+        break
 
-    return ""
+    return result
 
 
 if __name__ == '__main__':
 
     import sys
-    index = sys.argv[1]
-    msg = sys.argv[2]
-    even = {'msg':msg , 'index':index, "field":'pkey',"res":"res", "score":1.2}
+    msg = sys.argv[1]
+    even = {'msg':msg , 'index':'clara', "field":'pkey',"res":"res", "score":0.9}
     r = kbhandler(even)
     print("==== result ===")
     print(r)
