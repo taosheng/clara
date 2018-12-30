@@ -32,10 +32,14 @@ class Sentiment:
         clean_string = self.clean_string(s)
         words = clean_string.split(" ")
         s = 0
+        maxneg = 0
         for w in words:
             #print(s)
-            s = s + self.get_sent_by_string(w.lower())
-        return s
+            sent = self.get_sent_by_string(w.lower())
+            if sent < 0 :
+                maxneg = maxneg + sent
+            s = s + sent
+        return (s, maxneg)
 
     def get_num(self, parts):
         pstring = parts[5].split("=")[1].strip()

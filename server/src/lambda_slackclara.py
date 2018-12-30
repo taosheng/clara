@@ -55,14 +55,14 @@ def lambda_handler(data, context):
         if response.strip() == '' :
             response = "sorry~ don't know how to response --> " + text
 
-        evaluateSentiment = sentiment.weight_by_string(text)
+        (evaluateSentiment, maxneg) = sentiment.weight_by_string(text)
         print(evaluateSentiment)
         if evaluateSentiment <= -4 and evaluateSentiment >= -8 :
-            response = "I feel that you are a bit emotional \n"
-        if evaluateSentiment < -8 :
-            response = "I feel that you have an emotional breakdown, take a deep breath \n"
+            response = "I feel that you are a bit emotional \n" + response
+        if evaluateSentiment < -8 or maxneg < -10 :
+            response = "I feel that you have an emotional breakdown, take a deep breath \n" + response
         if evaluateSentiment > 4 :
-            response = "I am always happy to talk to you :) \n"
+            response = "I am always happy to talk to you :) \n" + response
         
         # Get the ID of the channel where the message was posted.
         channel_id = slack_event["channel"]
